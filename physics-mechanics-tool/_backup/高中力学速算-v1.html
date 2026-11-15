@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>高中力学速算 · 公式 / 计算 / 常量换算</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23101318'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='%233b82f6' font-family='sans-serif' font-weight='700'%3E力%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #101318;
+    --surface: #1a1f27;
+    --surface-2: #232a34;
+    --line: #2c3440;
+    --text: #e8ecf1;
+    --muted: #9aa5b1;
+    --accent: #3b82f6;
+    --accent-soft: #1e3a5f;
+    --result: #f5b544;
+    --danger: #e5604f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+  }
+  .app { max-width: 480px; margin: 0 auto; min-height: 100%; padding: 18px 16px 92px; }
+
+  /* 顶部 */
+  .header { margin-bottom: 18px; }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  .header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  /* 列表 */
+  .module-list { display: flex; flex-direction: column; gap: 12px; }
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  .module-card:active { background: var(--surface-2); }
+  .module-no {
+    flex: 0 0 38px; height: 38px; border-radius: 12px;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px;
+  }
+  .module-body { flex: 1; min-width: 0; }
+  .module-body h2 { font-size: 16px; font-weight: 600; }
+  .module-body p { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .module-arrow { color: var(--muted); font-size: 18px; }
+
+  /* 详情 */
+  .back-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .back-btn {
+    background: var(--surface); border: 1px solid var(--line); color: var(--text);
+    border-radius: 10px; padding: 8px 12px; font-size: 14px; cursor: pointer; min-height: 40px;
+  }
+  .detail-title { font-size: 19px; font-weight: 700; }
+  .detail-intro { color: var(--muted); font-size: 13px; margin: -8px 0 16px; }
+
+  .formula-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 15px; margin-bottom: 14px;
+  }
+  .formula-name { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .formula-expr {
+    font-size: 19px; font-weight: 600; letter-spacing: 0.3px;
+    margin-bottom: 10px; word-break: break-word;
+  }
+  .symbols { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+  .symbol { display: flex; gap: 8px; font-size: 13px; }
+  .symbol .sym { flex: 0 0 64px; color: var(--accent); font-weight: 600; }
+  .symbol .mean { flex: 1; color: var(--text); }
+  .symbol .unit { flex: 0 0 84px; text-align: right; color: var(--muted); }
+  .condition { font-size: 12.5px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 8px; }
+
+  /* 计算器 */
+  .calc { margin-top: 12px; background: var(--surface-2); border-radius: 12px; padding: 12px; }
+  .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12.5px; color: var(--muted); }
+  .field input {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 9px;
+    color: var(--text); font-size: 16px; padding: 9px 10px; min-height: 44px; width: 100%;
+  }
+  .field input:focus { outline: none; border-color: var(--accent); }
+  .calc-btn {
+    margin-top: 12px; width: 100%; min-height: 44px; border: none; border-radius: 11px;
+    background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  .calc-btn:active { opacity: 0.85; }
+  .calc-result { margin-top: 10px; font-size: 14px; min-height: 22px; }
+  .calc-result .ok { color: var(--result); font-weight: 700; }
+  .calc-result .err { color: var(--danger); }
+
+  /* 常量与换算 */
+  .const-table { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin-bottom: 18px; }
+  .const-row { display: grid; grid-template-columns: 1fr 1.2fr 0.9fr; padding: 12px 14px; border-top: 1px solid var(--line); font-size: 13px; }
+  .const-row:first-child { border-top: none; }
+  .const-row .k { color: var(--accent); font-weight: 600; }
+  .const-row .v { color: var(--text); }
+  .const-row .u { color: var(--muted); text-align: right; }
+  .note-inline { color: var(--muted); font-size: 11.5px; }
+  .conv-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 15px; }
+  .conv-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+  .conv-row select, .conv-row input {
+    background: var(--bg); border: 1px solid var(--line); border-radius: 9px; color: var(--text);
+    font-size: 16px; padding: 9px 10px; min-height: 44px; width: 100%;
+  }
+  .conv-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* 底部导航 */
+  .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; background: #151920;
+    border-top: 1px solid var(--line); z-index: 10;
+  }
+  .tabbar-inner { max-width: 480px; margin: 0 auto; display: flex; }
+  .tab {
+    flex: 1; background: none; border: none; color: var(--muted); cursor: pointer;
+    padding: 10px 0 12px; font-size: 13px; min-height: 52px;
+  }
+  .tab.active { color: var(--accent); font-weight: 600; }
+
+  .note { font-size: 12px; color: var(--muted); margin-top: 16px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<nav class="tabbar">
+  <div class="tabbar-inner">
+    <button class="tab" id="tab-modules" onclick="goList()">模块</button>
+    <button class="tab" id="tab-const" onclick="goConst()">常量换算</button>
+  </div>
+</nav>
+
+<script>
+/* ================= 数据 ================= */
+const G_DEFAULT = 9.8
+
+const MODULES = [
+  {
+    id: 'm1', name: '运动学', intro: '匀变速直线运动与自由落体的基本规律。',
+    formulas: [
+      {
+        name: '速度公式', expr: 'v = v₀ + at',
+        symbols: [['v', '末速度', 'm/s'], ['v₀', '初速度', 'm/s'], ['a', '加速度', 'm/s²'], ['t', '时间', 's']],
+        condition: '匀变速直线运动；a 与 v₀ 同向取正，反向取负。',
+        calc: {
+          inputs: [{ key: 'v0', label: '初速度 v₀', unit: 'm/s' }, { key: 'a', label: '加速度 a', unit: 'm/s²' }, { key: 't', label: '时间 t', unit: 's' }],
+          outputs: [{ key: 'v', label: '末速度 v', unit: 'm/s' }],
+          fn: i => ({ v: i.v0 + i.a * i.t })
+        }
+      },
+      {
+        name: '位移公式', expr: 'x = v₀t + ½at²',
+        symbols: [['x', '位移', 'm'], ['v₀', '初速度', 'm/s'], ['a', '加速度', 'm/s²'], ['t', '时间', 's']],
+        condition: '匀变速直线运动。',
+        calc: {
+          inputs: [{ key: 'v0', label: '初速度 v₀', unit: 'm/s' }, { key: 'a', label: '加速度 a', unit: 'm/s²' }, { key: 't', label: '时间 t', unit: 's' }],
+          outputs: [{ key: 'x', label: '位移 x', unit: 'm' }],
+          fn: i => ({ x: i.v0 * i.t + 0.5 * i.a * i.t * i.t })
+        }
+      },
+      {
+        name: '速度—位移关系', expr: 'v² − v₀² = 2ax',
+        symbols: [['v', '末速度', 'm/s'], ['v₀', '初速度', 'm/s'], ['a', '加速度', 'm/s²'], ['x', '位移', 'm']],
+        condition: '不含时间 t 时使用；根号内为负说明该速度不可能达到。',
+        calc: {
+          inputs: [{ key: 'v0', label: '初速度 v₀', unit: 'm/s' }, { key: 'a', label: '加速度 a', unit: 'm/s²' }, { key: 'x', label: '位移 x', unit: 'm' }],
+          outputs: [{ key: 'v', label: '末速度 v', unit: 'm/s' }],
+          fn: i => ({ v: Math.sqrt(i.v0 * i.v0 + 2 * i.a * i.x) })
+        }
+      },
+      {
+        name: '平均速度', expr: 'v̄ = (v₀ + v) / 2 = x / t',
+        symbols: [['v̄', '平均速度', 'm/s'], ['v₀', '初速度', 'm/s'], ['v', '末速度', 'm/s']],
+        condition: '仅适用于匀变速直线运动。',
+        calc: {
+          inputs: [{ key: 'v0', label: '初速度 v₀', unit: 'm/s' }, { key: 'v', label: '末速度 v', unit: 'm/s' }],
+          outputs: [{ key: 'vbar', label: '平均速度 v̄', unit: 'm/s' }],
+          fn: i => ({ vbar: (i.v0 + i.v) / 2 })
+        }
+      },
+      {
+        name: '自由落体', expr: 'v = gt，h = ½gt²',
+        symbols: [['v', '落地速度', 'm/s'], ['h', '下落高度', 'm'], ['t', '下落时间', 's'], ['g', '重力加速度', 'm/s²']],
+        condition: '初速度为 0、只受空气阻力可忽略的重力；g 默认 9.8，题目要求时取 10。',
+        calc: {
+          inputs: [{ key: 't', label: '下落时间 t', unit: 's' }, { key: 'g', label: '重力加速度 g', unit: 'm/s²' }],
+          outputs: [{ key: 'h', label: '下落高度 h', unit: 'm' }, { key: 'v', label: '落地速度 v', unit: 'm/s' }],
+          fn: i => ({ h: 0.5 * i.g * i.t * i.t, v: i.g * i.t })
+        }
+      }
+    ]
+  },
+  {
+    id: 'm2', name: '相互作用', intro: '重力、弹力、摩擦力与力的合成分解。',
+    formulas: [
+      {
+        name: '重力', expr: 'G = mg',
+        symbols: [['G', '重力', 'N'], ['m', '质量', 'kg'], ['g', '重力加速度', 'm/s²']],
+        condition: '在地球表面附近。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'g', label: '重力加速度 g', unit: 'm/s²' }],
+          outputs: [{ key: 'G', label: '重力 G', unit: 'N' }],
+          fn: i => ({ G: i.m * i.g })
+        }
+      },
+      {
+        name: '胡克定律', expr: 'F = kx',
+        symbols: [['F', '弹力', 'N'], ['k', '劲度系数', 'N/m'], ['x', '形变量（伸长/压缩量）', 'm']],
+        condition: 'x 是弹簧形变量，不是弹簧总长；在弹性限度内成立。',
+        calc: {
+          inputs: [{ key: 'k', label: '劲度系数 k', unit: 'N/m' }, { key: 'x', label: '形变量 x', unit: 'm' }],
+          outputs: [{ key: 'F', label: '弹力 F', unit: 'N' }],
+          fn: i => ({ F: i.k * i.x })
+        }
+      },
+      {
+        name: '滑动摩擦力', expr: 'f = μN',
+        symbols: [['f', '滑动摩擦力', 'N'], ['μ', '动摩擦因数', '—'], ['N', '正压力', 'N']],
+        condition: '接触面粗糙且发生相对滑动；N 是垂直于接触面的压力，不一定等于重力。',
+        calc: {
+          inputs: [{ key: 'mu', label: '动摩擦因数 μ', unit: '—' }, { key: 'N', label: '正压力 N', unit: 'N' }],
+          outputs: [{ key: 'f', label: '摩擦力 f', unit: 'N' }],
+          fn: i => ({ f: i.mu * i.N })
+        }
+      },
+      {
+        name: '力的合成（正交分解）', expr: 'F = √(Fx² + Fy²)',
+        symbols: [['F', '合力大小', 'N'], ['Fx', '水平分力', 'N'], ['Fy', '竖直分力', 'N']],
+        condition: '两个分力互相垂直时使用。',
+        calc: {
+          inputs: [{ key: 'Fx', label: '水平分力 Fx', unit: 'N' }, { key: 'Fy', label: '竖直分力 Fy', unit: 'N' }],
+          outputs: [{ key: 'F', label: '合力 F', unit: 'N' }],
+          fn: i => ({ F: Math.sqrt(i.Fx * i.Fx + i.Fy * i.Fy) })
+        }
+      },
+      {
+        name: '斜面重力分力', expr: 'G₁ = mg·sinθ，G₂ = mg·cosθ',
+        symbols: [['G₁', '沿斜面分力', 'N'], ['G₂', '垂直斜面分力', 'N'], ['m', '质量', 'kg'], ['θ', '斜面倾角', '°']],
+        condition: 'θ 为斜面与水平面的夹角。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'theta', label: '倾角 θ', unit: '°' }, { key: 'g', label: '重力加速度 g', unit: 'm/s²' }],
+          outputs: [{ key: 'G1', label: '沿斜面 G₁', unit: 'N' }, { key: 'G2', label: '垂直斜面 G₂', unit: 'N' }],
+          fn: i => { const r = rad(i.theta); return { G1: i.m * i.g * Math.sin(r), G2: i.m * i.g * Math.cos(r) } }
+        }
+      }
+    ]
+  },
+  {
+    id: 'm3', name: '牛顿运动定律', intro: '第二定律、超重失重与第三定律。',
+    formulas: [
+      {
+        name: '牛顿第二定律', expr: 'F合 = ma',
+        symbols: [['F合', '合外力', 'N'], ['m', '质量', 'kg'], ['a', '加速度', 'm/s²']],
+        condition: '加速度方向与合外力方向相同；F合 是所有外力的矢量和。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'a', label: '加速度 a', unit: 'm/s²' }],
+          outputs: [{ key: 'F', label: '合外力 F合', unit: 'N' }],
+          fn: i => ({ F: i.m * i.a })
+        }
+      },
+      {
+        name: '由力求加速度', expr: 'a = F合 / m',
+        symbols: [['a', '加速度', 'm/s²'], ['F合', '合外力', 'N'], ['m', '质量', 'kg']],
+        condition: '质量不能为 0。',
+        calc: {
+          inputs: [{ key: 'F', label: '合外力 F合', unit: 'N' }, { key: 'm', label: '质量 m', unit: 'kg' }],
+          outputs: [{ key: 'a', label: '加速度 a', unit: 'm/s²' }],
+          fn: i => ({ a: i.F / i.m })
+        }
+      },
+      {
+        name: '超重（加速上升 / 减速下降）', expr: 'N = m(g + a)',
+        symbols: [['N', '支持力（视重）', 'N'], ['m', '质量', 'kg'], ['a', '加速度大小', 'm/s²'], ['g', '重力加速度', 'm/s²']],
+        condition: '加速度方向向上时处于超重状态，N 大于 mg。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'a', label: '加速度 a', unit: 'm/s²' }, { key: 'g', label: '重力加速度 g', unit: 'm/s²' }],
+          outputs: [{ key: 'N', label: '支持力 N', unit: 'N' }],
+          fn: i => ({ N: i.m * (i.g + i.a) })
+        }
+      },
+      {
+        name: '失重（加速下降 / 减速上升）', expr: 'N = m(g − a)',
+        symbols: [['N', '支持力（视重）', 'N'], ['m', '质量', 'kg'], ['a', '加速度大小', 'm/s²'], ['g', '重力加速度', 'm/s²']],
+        condition: '加速度方向向下时处于失重状态；a = g 为完全失重。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'a', label: '加速度 a', unit: 'm/s²' }, { key: 'g', label: '重力加速度 g', unit: 'm/s²' }],
+          outputs: [{ key: 'N', label: '支持力 N', unit: 'N' }],
+          fn: i => ({ N: i.m * (i.g - i.a) })
+        }
+      },
+      {
+        name: '牛顿第三定律', expr: '作用力 = 反作用力',
+        symbols: [['—', '大小相等、方向相反', '—'], ['—', '作用在两个不同物体上', '—']],
+        condition: '作用力与反作用力不能相互平衡；平衡力作用在同一物体上，注意区分。',
+        calc: null
+      }
+    ]
+  },
+  {
+    id: 'm4', name: '曲线运动', intro: '平抛运动与圆周运动规律。',
+    formulas: [
+      {
+        name: '平抛：水平方向', expr: 'x = v₀t',
+        symbols: [['x', '水平位移', 'm'], ['v₀', '水平初速度', 'm/s'], ['t', '运动时间', 's']],
+        condition: '水平方向匀速直线运动。',
+        calc: {
+          inputs: [{ key: 'v0', label: '水平初速度 v₀', unit: 'm/s' }, { key: 't', label: '时间 t', unit: 's' }],
+          outputs: [{ key: 'x', label: '水平位移 x', unit: 'm' }],
+          fn: i => ({ x: i.v0 * i.t })
+        }
+      },
+      {
+        name: '平抛：竖直方向', expr: 'y = ½gt²，v_y = gt',
+        symbols: [['y', '竖直下落距离', 'm'], ['v_y', '竖直分速度', 'm/s'], ['t', '运动时间', 's'], ['g', '重力加速度', 'm/s²']],
+        condition: '竖直方向自由落体。',
+        calc: {
+          inputs: [{ key: 't', label: '时间 t', unit: 's' }, { key: 'g', label: '重力加速度 g', unit: 'm/s²' }],
+          outputs: [{ key: 'y', label: '竖直距离 y', unit: 'm' }, { key: 'vy', label: '竖直速度 v_y', unit: 'm/s' }],
+          fn: i => ({ y: 0.5 * i.g * i.t * i.t, vy: i.g * i.t })
+        }
+      },
+      {
+        name: '平抛：合速度', expr: 'v = √(v₀² + v_y²)，tanθ = v_y / v₀',
+        symbols: [['v', '合速度', 'm/s'], ['v₀', '水平初速度', 'm/s'], ['v_y', '竖直分速度', 'm/s'], ['θ', '速度与水平方向夹角', '°']],
+        condition: 'θ 为合速度方向与水平方向的夹角。',
+        calc: {
+          inputs: [{ key: 'v0', label: '水平初速度 v₀', unit: 'm/s' }, { key: 'vy', label: '竖直速度 v_y', unit: 'm/s' }],
+          outputs: [{ key: 'v', label: '合速度 v', unit: 'm/s' }, { key: 'tan', label: 'tanθ', unit: '—' }],
+          fn: i => ({ v: Math.sqrt(i.v0 * i.v0 + i.vy * i.vy), tan: i.vy / i.v0 })
+        }
+      },
+      {
+        name: '圆周：线速度与角速度', expr: 'v = ωr',
+        symbols: [['v', '线速度', 'm/s'], ['ω', '角速度', 'rad/s'], ['r', '圆周半径', 'm']],
+        condition: '匀速圆周运动。',
+        calc: {
+          inputs: [{ key: 'w', label: '角速度 ω', unit: 'rad/s' }, { key: 'r', label: '半径 r', unit: 'm' }],
+          outputs: [{ key: 'v', label: '线速度 v', unit: 'm/s' }],
+          fn: i => ({ v: i.w * i.r })
+        }
+      },
+      {
+        name: '向心加速度', expr: 'aₙ = v²/r = ω²r',
+        symbols: [['aₙ', '向心加速度', 'm/s²'], ['v', '线速度', 'm/s'], ['r', '圆周半径', 'm']],
+        condition: '方向指向圆心，只改变速度方向。',
+        calc: {
+          inputs: [{ key: 'v', label: '线速度 v', unit: 'm/s' }, { key: 'r', label: '半径 r', unit: 'm' }],
+          outputs: [{ key: 'an', label: '向心加速度 aₙ', unit: 'm/s²' }],
+          fn: i => ({ an: i.v * i.v / i.r })
+        }
+      },
+      {
+        name: '向心力', expr: 'Fₙ = mv²/r = mω²r',
+        symbols: [['Fₙ', '向心力', 'N'], ['m', '质量', 'kg'], ['v', '线速度', 'm/s'], ['r', '圆周半径', 'm']],
+        condition: '向心力是效果力，由其他真实力（拉力、摩擦力、引力等）提供。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'v', label: '线速度 v', unit: 'm/s' }, { key: 'r', label: '半径 r', unit: 'm' }],
+          outputs: [{ key: 'Fn', label: '向心力 Fₙ', unit: 'N' }],
+          fn: i => ({ Fn: i.m * i.v * i.v / i.r })
+        }
+      }
+    ]
+  },
+  {
+    id: 'm5', name: '万有引力与航天', intro: '天体引力、环绕速度与周期。',
+    formulas: [
+      {
+        name: '万有引力定律', expr: 'F = GMm / r²',
+        symbols: [['F', '万有引力', 'N'], ['G', '引力常量', 'N·m²/kg²'], ['M', '中心天体质量', 'kg'], ['m', '环绕天体质量', 'kg'], ['r', '两天体质心距离', 'm']],
+        condition: '可视为质点的两个球体；r 取球心间距。',
+        calc: {
+          inputs: [{ key: 'G', label: '引力常量 G', unit: 'N·m²/kg²' }, { key: 'M', label: '中心天体 M', unit: 'kg' }, { key: 'm', label: '环绕天体 m', unit: 'kg' }, { key: 'r', label: '距离 r', unit: 'm' }],
+          outputs: [{ key: 'F', label: '引力 F', unit: 'N' }],
+          fn: i => ({ F: i.G * i.M * i.m / (i.r * i.r) })
+        }
+      },
+      {
+        name: '星球表面重力（黄金代换）', expr: 'g = GM / R²',
+        symbols: [['g', '表面重力加速度', 'm/s²'], ['G', '引力常量', 'N·m²/kg²'], ['M', '星球质量', 'kg'], ['R', '星球半径', 'm']],
+        condition: '忽略星球自转影响时，表面重力近似等于万有引力。',
+        calc: {
+          inputs: [{ key: 'G', label: '引力常量 G', unit: 'N·m²/kg²' }, { key: 'M', label: '星球质量 M', unit: 'kg' }, { key: 'R', label: '星球半径 R', unit: 'm' }],
+          outputs: [{ key: 'g', label: '重力加速度 g', unit: 'm/s²' }],
+          fn: i => ({ g: i.G * i.M / (i.R * i.R) })
+        }
+      },
+      {
+        name: '环绕速度', expr: 'v = √(GM / r)',
+        symbols: [['v', '环绕线速度', 'm/s'], ['G', '引力常量', 'N·m²/kg²'], ['M', '中心天体质量', 'kg'], ['r', '轨道半径', 'm']],
+        condition: '万有引力提供向心力的圆轨道。',
+        calc: {
+          inputs: [{ key: 'G', label: '引力常量 G', unit: 'N·m²/kg²' }, { key: 'M', label: '中心天体 M', unit: 'kg' }, { key: 'r', label: '轨道半径 r', unit: 'm' }],
+          outputs: [{ key: 'v', label: '环绕速度 v', unit: 'm/s' }],
+          fn: i => ({ v: Math.sqrt(i.G * i.M / i.r) })
+        }
+      },
+      {
+        name: '环绕周期', expr: 'T = 2π√(r³ / GM)',
+        symbols: [['T', '环绕周期', 's'], ['r', '轨道半径', 'm'], ['G', '引力常量', 'N·m²/kg²'], ['M', '中心天体质量', 'kg']],
+        condition: '圆轨道；周期单位为秒。',
+        calc: {
+          inputs: [{ key: 'G', label: '引力常量 G', unit: 'N·m²/kg²' }, { key: 'M', label: '中心天体 M', unit: 'kg' }, { key: 'r', label: '轨道半径 r', unit: 'm' }],
+          outputs: [{ key: 'T', label: '周期 T', unit: 's' }],
+          fn: i => ({ T: 2 * Math.PI * Math.sqrt(i.r * i.r * i.r / (i.G * i.M)) })
+        }
+      },
+      {
+        name: '第一宇宙速度', expr: 'v₁ = √(gR)',
+        symbols: [['v₁', '第一宇宙速度', 'm/s'], ['g', '星球表面重力加速度', 'm/s²'], ['R', '星球半径', 'm']],
+        condition: '近地环绕的最小发射速度；地球表面约 7.9 km/s。',
+        calc: {
+          inputs: [{ key: 'g', label: '重力加速度 g', unit: 'm/s²' }, { key: 'R', label: '星球半径 R', unit: 'm' }],
+          outputs: [{ key: 'v1', label: '第一宇宙速度 v₁', unit: 'm/s' }],
+          fn: i => ({ v1: Math.sqrt(i.g * i.R) })
+        }
+      }
+    ]
+  },
+  {
+    id: 'm6', name: '功和能', intro: '功、功率、动能、势能与动能定理。',
+    formulas: [
+      {
+        name: '功', expr: 'W = Fs·cosθ',
+        symbols: [['W', '功', 'J'], ['F', '力', 'N'], ['s', '位移', 'm'], ['θ', '力与位移夹角', '°']],
+        condition: 'θ 为 F 与 s 方向的夹角；cosθ 为负时做负功。',
+        calc: {
+          inputs: [{ key: 'F', label: '力 F', unit: 'N' }, { key: 's', label: '位移 s', unit: 'm' }, { key: 'theta', label: '夹角 θ', unit: '°' }],
+          outputs: [{ key: 'W', label: '功 W', unit: 'J' }],
+          fn: i => ({ W: i.F * i.s * Math.cos(rad(i.theta)) })
+        }
+      },
+      {
+        name: '功率', expr: 'P = W/t = Fv（匀速）',
+        symbols: [['P', '功率', 'W'], ['F', '力', 'N'], ['v', '速度', 'm/s'], ['W', '功', 'J'], ['t', '时间', 's']],
+        condition: 'P = Fv 适用于力与速度方向一致的匀速过程。',
+        calc: {
+          inputs: [{ key: 'F', label: '力 F', unit: 'N' }, { key: 'v', label: '速度 v', unit: 'm/s' }],
+          outputs: [{ key: 'P', label: '功率 P', unit: 'W' }],
+          fn: i => ({ P: i.F * i.v })
+        }
+      },
+      {
+        name: '动能', expr: 'Eₖ = ½mv²',
+        symbols: [['Eₖ', '动能', 'J'], ['m', '质量', 'kg'], ['v', '速度', 'm/s']],
+        condition: '动能是标量，恒为非负。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'v', label: '速度 v', unit: 'm/s' }],
+          outputs: [{ key: 'Ek', label: '动能 Eₖ', unit: 'J' }],
+          fn: i => ({ Ek: 0.5 * i.m * i.v * i.v })
+        }
+      },
+      {
+        name: '重力势能', expr: 'Eₚ = mgh',
+        symbols: [['Eₚ', '重力势能', 'J'], ['m', '质量', 'kg'], ['g', '重力加速度', 'm/s²'], ['h', '相对参考面高度', 'm']],
+        condition: '势能大小与参考平面选取有关；h 在参考面上方为正。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'h', label: '高度 h', unit: 'm' }, { key: 'g', label: '重力加速度 g', unit: 'm/s²' }],
+          outputs: [{ key: 'Ep', label: '势能 Eₚ', unit: 'J' }],
+          fn: i => ({ Ep: i.m * i.g * i.h })
+        }
+      },
+      {
+        name: '动能定理', expr: 'W合 = ½mv₂² − ½mv₁²',
+        symbols: [['W合', '合外力做的功', 'J'], ['m', '质量', 'kg'], ['v₁', '初速度', 'm/s'], ['v₂', '末速度', 'm/s']],
+        condition: '合外力做功等于动能变化量；可用于求变力做功。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'v1', label: '初速度 v₁', unit: 'm/s' }, { key: 'v2', label: '末速度 v₂', unit: 'm/s' }],
+          outputs: [{ key: 'W', label: '合功 W合', unit: 'J' }],
+          fn: i => ({ W: 0.5 * i.m * (i.v2 * i.v2 - i.v1 * i.v1) })
+        }
+      },
+      {
+        name: '机械能守恒', expr: '½mv₁² + mgh₁ = ½mv₂² + mgh₂',
+        symbols: [['—', '动能与重力势能相互转化', '—'], ['—', '守恒条件：只有重力或弹力做功', '—']],
+        condition: '存在摩擦力、空气阻力或外力做功时，机械能不守恒。',
+        calc: null
+      }
+    ]
+  },
+  {
+    id: 'm7', name: '动量', intro: '动量、冲量、动量定理与碰撞共速。',
+    formulas: [
+      {
+        name: '动量', expr: 'p = mv',
+        symbols: [['p', '动量', 'kg·m/s'], ['m', '质量', 'kg'], ['v', '速度', 'm/s']],
+        condition: '动量方向与速度方向相同，是矢量。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'v', label: '速度 v', unit: 'm/s' }],
+          outputs: [{ key: 'p', label: '动量 p', unit: 'kg·m/s' }],
+          fn: i => ({ p: i.m * i.v })
+        }
+      },
+      {
+        name: '冲量', expr: 'I = Ft',
+        symbols: [['I', '冲量', 'N·s'], ['F', '力', 'N'], ['t', '作用时间', 's']],
+        condition: '冲量方向与力的方向相同。',
+        calc: {
+          inputs: [{ key: 'F', label: '力 F', unit: 'N' }, { key: 't', label: '时间 t', unit: 's' }],
+          outputs: [{ key: 'I', label: '冲量 I', unit: 'N·s' }],
+          fn: i => ({ I: i.F * i.t })
+        }
+      },
+      {
+        name: '动量定理', expr: 'Ft = mv′ − mv',
+        symbols: [['Ft', '合外力冲量', 'N·s'], ['m', '质量', 'kg'], ['v', '初速度', 'm/s'], ["v′", '末速度', 'm/s']],
+        condition: '结果为动量变化量；先规定正方向，速度带正负号代入。',
+        calc: {
+          inputs: [{ key: 'm', label: '质量 m', unit: 'kg' }, { key: 'v', label: '初速度 v', unit: 'm/s' }, { key: 'vp', label: '末速度 v′', unit: 'm/s' }],
+          outputs: [{ key: 'dp', label: '动量变化 Δp', unit: 'kg·m/s' }],
+          fn: i => ({ dp: i.m * (i.vp - i.v) })
+        }
+      },
+      {
+        name: '动量守恒定律', expr: 'm₁v₁ + m₂v₂ = m₁v₁′ + m₂v₂′',
+        symbols: [['—', '系统总动量保持不变', '—'], ['—', '条件：不受外力或合外力为零', '—']],
+        condition: '碰撞、爆炸、反冲过程中常用；注意各速度相对同一参考系，并先定正方向。',
+        calc: null
+      },
+      {
+        name: '完全非弹性碰撞共速', expr: 'v共 = (m₁v₁ + m₂v₂) / (m₁ + m₂)',
+        symbols: [['v共', '碰后共同速度', 'm/s'], ['m₁、m₂', '两物体质量', 'kg'], ['v₁、v₂', '碰前速度', 'm/s']],
+        condition: '碰后两物体粘在一起、以共同速度运动；速度需带正负号。',
+        calc: {
+          inputs: [{ key: 'm1', label: '质量 m₁', unit: 'kg' }, { key: 'v1', label: '速度 v₁', unit: 'm/s' }, { key: 'm2', label: '质量 m₂', unit: 'kg' }, { key: 'v2', label: '速度 v₂', unit: 'm/s' }],
+          outputs: [{ key: 'vc', label: '共同速度 v共', unit: 'm/s' }],
+          fn: i => ({ vc: (i.m1 * i.v1 + i.m2 * i.v2) / (i.m1 + i.m2) })
+        }
+      }
+    ]
+  }
+]
+
+const CONSTANTS = [
+  ['g', '9.8', 'm/s²', '重力加速度；题目未说明时常取 10'],
+  ['G', '6.67×10⁻¹¹', 'N·m²/kg²', '万有引力常量'],
+  ['M地', '5.97×10²⁴', 'kg', '地球质量'],
+  ['R地', '6.37×10⁶', 'm', '地球平均半径']
+]
+
+const UNITS = {
+  '长度': { units: { 'km': 1000, 'm': 1, 'cm': 0.01, 'mm': 0.001 } },
+  '质量': { units: { 't': 1000, 'kg': 1, 'g': 0.001, 'mg': 1e-6 } },
+  '时间': { units: { 'h': 3600, 'min': 60, 's': 1 } },
+  '力': { units: { 'kN': 1000, 'N': 1 } },
+  '能量': { units: { 'kJ': 1000, 'J': 1, 'eV': 1.602e-19 } },
+  '压强': { units: { 'kPa': 1000, 'Pa': 1, 'atm': 1.013e5 } }
+}
+
+/* ================= 状态与工具 ================= */
+const state = { view: 'list', moduleId: null, convCat: '长度' }
+
+function $(id) { return document.getElementById(id) }
+function esc(s) { return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])) }
+function rad(deg) { return deg * Math.PI / 180 }
+function num(v) { const n = parseFloat(v); return isNaN(n) ? NaN : n }
+
+function fmt(x) {
+  if (typeof x !== 'number' || !isFinite(x)) return null
+  if (x === 0) return '0'
+  const abs = Math.abs(x)
+  if (abs >= 1e5 || abs < 1e-3) return x.toExponential(3)
+  return String(Number(x.toPrecision(4)))
+}
+
+/* ================= 渲染 ================= */
+function render() {
+  const app = $('app')
+  $('tab-modules').classList.toggle('active', state.view !== 'const')
+  $('tab-const').classList.toggle('active', state.view === 'const')
+
+  if (state.view === 'list') app.innerHTML = renderList()
+  else if (state.view === 'module') app.innerHTML = renderDetail()
+  else app.innerHTML = renderConst()
+  window.scrollTo(0, 0)
+}
+
+function renderList() {
+  const cards = MODULES.map((m, i) => `
+    <div class="module-card" onclick="goModule('${m.id}')">
+      <div class="module-no">${String(i + 1).padStart(2, '0')}</div>
+      <div class="module-body">
+        <h2>${esc(m.name)}</h2>
+        <p>${esc(m.intro)}</p>
+      </div>
+      <div class="module-arrow">›</div>
+    </div>`).join('')
+  return `
+    <div class="header">
+      <h1>高中力学速算</h1>
+      <p>公式速查 · 代入计算 · 常量与单位换算（第一版：力学核心）</p>
+    </div>
+    <div class="module-list">${cards}</div>
+    <p class="note">说明：公式与单位按高中物理常用口径整理；计算结果保留 4 位有效数字。后续可再扩展电磁学、热学等板块。</p>`
+}
+
+function renderDetail() {
+  const m = MODULES.find(x => x.id === state.moduleId)
+  if (!m) return renderList()
+  const cards = m.formulas.map((f, fi) => renderFormula(m.id, fi, f)).join('')
+  return `
+    <div class="back-bar">
+      <button class="back-btn" onclick="goList()">‹ 返回模块</button>
+      <div class="detail-title">${esc(m.name)}</div>
+    </div>
+    <p class="detail-intro">${esc(m.intro)}</p>
+    ${cards}`
+}
+
+function renderFormula(mid, fi, f) {
+  const syms = f.symbols.map(s => `
+    <div class="symbol"><span class="sym">${esc(s[0])}</span><span class="mean">${esc(s[1])}</span><span class="unit">${esc(s[2])}</span></div>`).join('')
+  const calc = f.calc ? renderCalc(mid, fi, f.calc) : ''
+  return `
+    <div class="formula-card">
+      <div class="formula-name">${esc(f.name)}</div>
+      <div class="formula-expr">${esc(f.expr)}</div>
+      <div class="symbols">${syms}</div>
+      <div class="condition">${esc(f.condition)}</div>
+      ${calc}
+    </div>`
+}
+
+function renderCalc(mid, fi, calc) {
+  const inputs = calc.inputs.map(inp => `
+    <div class="field">
+      <label>${esc(inp.label)}（${esc(inp.unit)}）</label>
+      <input type="number" step="any" id="inp-${mid}-${fi}-${inp.key}" placeholder="0">
+    </div>`).join('')
+  return `
+    <div class="calc">
+      <div class="calc-grid">${inputs}</div>
+      <button class="calc-btn" onclick="runCalc('${mid}', ${fi})">计算</button>
+      <div class="calc-result" id="res-${mid}-${fi}"></div>
+    </div>`
+}
+
+function renderConst() {
+  const rows = CONSTANTS.map(c => `
+    <div class="const-row"><span class="k">${esc(c[0])}</span><span class="v">${esc(c[1])}<br><span class="note-inline">${esc(c[3])}</span></span><span class="u">${esc(c[2])}</span></div>`).join('')
+  const catOptions = Object.keys(UNITS).map(k => `<option value="${esc(k)}">${esc(k)}</option>`).join('')
+  const unitOptions = Object.keys(UNITS[state.convCat].units).map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('')
+  return `
+    <div class="header">
+      <h1>常量与单位换算</h1>
+      <p>力学常用常量；跨单位数值换算</p>
+    </div>
+    <div class="const-table">${rows}</div>
+    <div class="conv-card">
+      <div class="conv-row">
+        <label>换算类别</label>
+        <select id="conv-cat" onchange="changeConvCat(this.value)">${catOptions}</select>
+      </div>
+      <div class="conv-row">
+        <label>数值</label>
+        <input type="number" step="any" id="conv-value" placeholder="输入数值">
+      </div>
+      <div class="conv-two">
+        <div class="field"><label>从</label><select id="conv-from">${unitOptions}</select></div>
+        <div class="field"><label>到</label><select id="conv-to">${unitOptions}</select></div>
+      </div>
+      <button class="calc-btn" onclick="runConvert()">换算</button>
+      <div class="calc-result" id="conv-result"></div>
+    </div>
+    <p class="note">eV 为能量单位：1 eV ≈ 1.602×10⁻¹⁹ J；atm 为标准大气压。换算结果按有效数字显示。</p>`
+}
+
+/* ================= 交互 ================= */
+function goList() { state.view = 'list'; state.moduleId = null; render() }
+function goModule(id) { state.view = 'module'; state.moduleId = id; render() }
+function goConst() { state.view = 'const'; render() }
+
+function runCalc(mid, fi) {
+  const m = MODULES.find(x => x.id === mid)
+  const f = m.formulas[fi]
+  const calc = f.calc
+  const raw = {}
+  for (const inp of calc.inputs) {
+    const el = $(`inp-${mid}-${fi}-${inp.key}`)
+    raw[inp.key] = num(el.value)
+  }
+  const resEl = $(`res-${mid}-${fi}`)
+  const bad = Object.values(raw).some(v => isNaN(v))
+  if (bad) { resEl.innerHTML = '<span class="err">请填写完整的有效数值</span>'; return }
+
+  let out
+  try { out = calc.fn(raw) } catch (e) { out = null }
+  const parts = calc.outputs.map(o => {
+    const val = out ? out[o.key] : NaN
+    const txt = fmt(val)
+    return txt === null ? null : `${esc(o.label)}：<span class="ok">${txt}</span> ${esc(o.unit)}`
+  })
+  if (parts.some(p => p === null)) { resEl.innerHTML = '<span class="err">结果不成立，检查输入（如除零、根号内为负）</span>'; return }
+  resEl.innerHTML = parts.join('<br>')
+}
+
+function changeConvCat(cat) {
+  state.convCat = cat
+  const units = Object.keys(UNITS[cat].units)
+  $('conv-from').innerHTML = units.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('')
+  $('conv-to').innerHTML = units.map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('')
+  $('conv-result').innerHTML = ''
+}
+
+function runConvert() {
+  const v = num($('conv-value').value)
+  const from = $('conv-from').value
+  const to = $('conv-to').value
+  const resEl = $('conv-result')
+  if (isNaN(v)) { resEl.innerHTML = '<span class="err">请输入有效数值</span>'; return }
+  const table = UNITS[state.convCat].units
+  const base = v * table[from]
+  const out = base / table[to]
+  const txt = fmt(out)
+  resEl.innerHTML = txt === null
+    ? '<span class="err">换算结果不成立</span>'
+    : `${esc(v)} ${esc(from)} = <span class="ok">${txt}</span> ${esc(to)}`
+}
+
+render()
+</script>
+</body>
+</html>

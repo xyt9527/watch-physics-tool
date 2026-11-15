@@ -1,0 +1,11 @@
+# 临时与构建产物
+.tmp-tool-results/
+node_modules/
+dist/
+build/
+**/_shots/
+*.log
+
+# 编辑器 / 快应用运行时
+.ide/
+.autorun/

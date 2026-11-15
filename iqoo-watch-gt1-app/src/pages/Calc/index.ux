@@ -1,0 +1,233 @@
+<template>
+  <div class="app">
+    <div class="display">
+      <text class="display-op">{{ pendingOp }}</text>
+      <text class="display-text">{{ current }}</text>
+    </div>
+
+    <div class="row">
+      <input class="btn btn-danger" type="button" value="C" onclick="onClear" />
+      <input class="btn btn-num" type="button" value="⌫" onclick="onBackspace" />
+      <input class="btn btn-num" type="button" value="%" onclick="onPercent" />
+      <input class="btn btn-op" type="button" value="÷" onclick="onOperator('÷')" />
+    </div>
+
+    <div class="row">
+      <input class="btn btn-num" type="button" value="7" onclick="onDigit('7')" />
+      <input class="btn btn-num" type="button" value="8" onclick="onDigit('8')" />
+      <input class="btn btn-num" type="button" value="9" onclick="onDigit('9')" />
+      <input class="btn btn-op" type="button" value="×" onclick="onOperator('×')" />
+    </div>
+
+    <div class="row">
+      <input class="btn btn-num" type="button" value="4" onclick="onDigit('4')" />
+      <input class="btn btn-num" type="button" value="5" onclick="onDigit('5')" />
+      <input class="btn btn-num" type="button" value="6" onclick="onDigit('6')" />
+      <input class="btn btn-op" type="button" value="−" onclick="onOperator('−')" />
+    </div>
+
+    <div class="row">
+      <input class="btn btn-num" type="button" value="1" onclick="onDigit('1')" />
+      <input class="btn btn-num" type="button" value="2" onclick="onDigit('2')" />
+      <input class="btn btn-num" type="button" value="3" onclick="onDigit('3')" />
+      <input class="btn btn-op" type="button" value="+" onclick="onOperator('+')" />
+    </div>
+
+    <div class="row">
+      <input class="btn btn-num btn-wide" type="button" value="0" onclick="onDigit('0')" />
+      <input class="btn btn-num" type="button" value="." onclick="onDot" />
+      <input class="btn btn-eq" type="button" value="=" onclick="onEqual" />
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data: {
+    current: '0',
+    prev: null,
+    op: null,
+    pendingOp: '',
+    justEvaluated: false,
+    error: false
+  },
+
+  onDigit(d) {
+    if (this.error) this.resetState()
+    if (this.justEvaluated) {
+      this.current = d
+      this.prev = null
+      this.op = null
+      this.pendingOp = ''
+      this.justEvaluated = false
+      return
+    }
+    if (this.current === '0') {
+      this.current = d
+    } else if (this.current.replace(/[-.]/g, '').length < 10) {
+      this.current = this.current + d
+    }
+  },
+
+  onDot() {
+    if (this.error) this.resetState()
+    if (this.justEvaluated) {
+      this.current = '0.'
+      this.prev = null
+      this.op = null
+      this.pendingOp = ''
+      this.justEvaluated = false
+      return
+    }
+    if (this.current.indexOf('.') === -1) {
+      this.current = this.current + '.'
+    }
+  },
+
+  onClear() {
+    this.resetState()
+  },
+
+  onBackspace() {
+    if (this.error) {
+      this.resetState()
+      return
+    }
+    this.current = this.current.length > 1 ? this.current.slice(0, -1) : '0'
+  },
+
+  onPercent() {
+    if (this.error) return
+    const v = parseFloat(this.current) / 100
+    this.current = this.fmt(v)
+    this.justEvaluated = true
+  },
+
+  onOperator(op) {
+    if (this.error) return
+    const input = parseFloat(this.current)
+    if (this.op !== null && this.prev !== null && !this.justEvaluated) {
+      const res = this.compute(this.prev, input, this.op)
+      this.prev = res
+      this.current = this.fmt(res)
+    } else {
+      this.prev = input
+    }
+    this.op = op
+    this.pendingOp = op
+    this.justEvaluated = true
+  },
+
+  onEqual() {
+    if (this.error || this.op === null || this.prev === null) return
+    const res = this.compute(this.prev, parseFloat(this.current), this.op)
+    this.current = this.fmt(res)
+    this.prev = null
+    this.op = null
+    this.pendingOp = ''
+    this.justEvaluated = true
+  },
+
+  compute(a, b, op) {
+    switch (op) {
+      case '÷':
+        return b === 0 ? NaN : a / b
+      case '×':
+        return a * b
+      case '−':
+        return a - b
+      case '+':
+        return a + b
+      default:
+        return b
+    }
+  },
+
+  fmt(n) {
+    if (typeof n !== 'number' || isNaN(n) || !isFinite(n)) {
+      this.error = true
+      return '错误'
+    }
+    const rounded = Math.round(n * 1e10) / 1e10
+    let s = String(rounded)
+    if (s.length > 12) s = String(Number(rounded.toPrecision(10)))
+    return s
+  },
+
+  resetState() {
+    this.current = '0'
+    this.prev = null
+    this.op = null
+    this.pendingOp = ''
+    this.justEvaluated = false
+    this.error = false
+  }
+}
+</script>
+
+<style>
+.app {
+  flex-direction: column;
+  background-color: #0f1115;
+  padding: 14;
+}
+
+.display {
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding-bottom: 16;
+}
+
+.display-op {
+  color: #8a93a3;
+  font-size: 22px;
+  lines: 1;
+  margin-bottom: 6;
+}
+
+.display-text {
+  color: #ffffff;
+  font-size: 46px;
+  lines: 1;
+}
+
+.row {
+  flex-direction: row;
+  margin-top: 8;
+}
+
+.btn {
+  flex: 1;
+  height: 62;
+  border-radius: 16;
+  margin: 6;
+  justify-content: center;
+  align-items: center;
+  font-size: 28px;
+}
+
+.btn-wide {
+  flex: 2;
+}
+
+.btn-num {
+  background-color: #1f2329;
+  color: #ffffff;
+}
+
+.btn-op {
+  background-color: #2d3440;
+  color: #4ea1ff;
+}
+
+.btn-eq {
+  background-color: #1890ff;
+  color: #ffffff;
+}
+
+.btn-danger {
+  background-color: #3a2226;
+  color: #ff6b6b;
+}
+</style>

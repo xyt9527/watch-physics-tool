@@ -1,0 +1,8 @@
+<script>
+/**manifest**/
+export default {
+  onCreate() {
+    console.log('iqoo-watch-gt1-calc app onCreate')
+  }
+}
+</script>

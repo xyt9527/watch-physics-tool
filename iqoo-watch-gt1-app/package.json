@@ -1,0 +1,11 @@
+{
+  "name": "iqoo-watch-gt1-calc",
+  "version": "1.0.0",
+  "description": "BlueOS watch calculator demo for iQOO WATCH GT1, sideloadable via OrbitV. Debug only; no release signing or store upload.",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Open this folder in BlueOS Studio, then click 安装依赖 -> 重新启动编译'",
+    "build:debug": "echo 'In BlueOS Studio click 打包, choose debug; output rpk is in dist/'"
+  },
+  "devDependencies": {}
+}
